@@ -183,9 +183,9 @@ struct LogEntryView: View {
                 }
             }
             .padding(4)
-            .background {
+                .background {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.04))
+                    .fill(Color.primary.opacity(0.06))
             }
             
             // Description
@@ -212,10 +212,10 @@ struct LogEntryView: View {
                 .padding(10)
                 .background {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(Color.white.opacity(0.04))
+                        .fill(Color.primary.opacity(0.05))
                         .overlay {
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
                         }
                 }
                 .overlay(alignment: .topLeading) {
@@ -247,10 +247,10 @@ struct LogEntryView: View {
                     .padding(.vertical, 8)
                     .background {
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color.white.opacity(0.04))
+                            .fill(Color.primary.opacity(0.05))
                             .overlay {
                                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                                    .stroke(Color.primary.opacity(0.06), lineWidth: 1)
                             }
                     }
                     .onSubmit { addTag() }
@@ -310,7 +310,7 @@ struct LogEntryView: View {
                             .padding(.vertical, 4)
                             .background {
                                 Capsule()
-                                    .stroke(tags.contains(suggestion) ? MindCycleTheme.accent.opacity(0.3) : Color.white.opacity(0.08), lineWidth: 1)
+                                    .stroke(tags.contains(suggestion) ? MindCycleTheme.accent.opacity(0.3) : Color.primary.opacity(0.1), lineWidth: 1)
                             }
                     }
                     .buttonStyle(.plain)
@@ -344,7 +344,7 @@ struct LogEntryView: View {
                     .padding(.vertical, 10)
                     .background {
                         Capsule()
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                            .stroke(Color.primary.opacity(0.1), lineWidth: 1)
                     }
                 }
                 .buttonStyle(.plain)
@@ -429,10 +429,10 @@ struct LogEntryView: View {
         .padding(12)
         .background {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.white.opacity(0.03))
+                .fill(Color.primary.opacity(0.04))
                 .overlay {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                        .stroke(Color.primary.opacity(0.08), lineWidth: 1)
                 }
         }
     }
@@ -465,7 +465,7 @@ struct LogEntryView: View {
                 .fill(.ultraThinMaterial)
                 .overlay {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(Color.primary.opacity(0.1), lineWidth: 1)
                 }
         }
         .transition(.scale(scale: 0.8).combined(with: .opacity))
@@ -552,7 +552,7 @@ struct LogEntryView: View {
             HStack(spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(isOn.wrappedValue ? color.opacity(0.15) : Color.white.opacity(0.04))
+                        .fill(isOn.wrappedValue ? color.opacity(0.15) : Color.primary.opacity(0.05))
                         .frame(width: 36, height: 36)
                     
                     Image(systemName: icon)
@@ -583,7 +583,7 @@ struct LogEntryView: View {
                     .fill(isOn.wrappedValue ? color.opacity(0.06) : Color.clear)
                     .overlay {
                         RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .stroke(isOn.wrappedValue ? color.opacity(0.2) : Color.white.opacity(0.06), lineWidth: 1)
+                            .stroke(isOn.wrappedValue ? color.opacity(0.2) : Color.primary.opacity(0.06), lineWidth: 1)
                     }
             }
         }

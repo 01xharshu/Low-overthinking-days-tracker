@@ -12,12 +12,38 @@ struct MindCycleTheme {
     
     // MARK: - Core Palette
     
-    /// Deep space background
-    static let backgroundPrimary = Color(red: 0.067, green: 0.071, blue: 0.106)
+    /// Deep background
+    static var backgroundPrimary: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                return NSColor(red: 0.067, green: 0.071, blue: 0.106, alpha: 1.0)
+            } else {
+                return NSColor(red: 0.96, green: 0.97, blue: 1.0, alpha: 1.0)
+            }
+        })
+    }
+    
     /// Slightly elevated surface
-    static let backgroundSecondary = Color(red: 0.098, green: 0.106, blue: 0.153)
+    static var backgroundSecondary: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                return NSColor(red: 0.098, green: 0.106, blue: 0.153, alpha: 1.0)
+            } else {
+                return NSColor(red: 0.92, green: 0.93, blue: 0.98, alpha: 1.0)
+            }
+        })
+    }
+    
     /// Card/panel surface
-    static let backgroundTertiary = Color(red: 0.133, green: 0.145, blue: 0.200)
+    static var backgroundTertiary: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                return NSColor(red: 0.133, green: 0.145, blue: 0.200, alpha: 1.0)
+            } else {
+                return NSColor.white
+            }
+        })
+    }
     
     /// Soft lavender accent – primary brand color
     static let accent = Color(red: 0.545, green: 0.502, blue: 0.957)
@@ -40,12 +66,38 @@ struct MindCycleTheme {
     /// Severe intensity – soft coral
     static let severeIntensity = Color(red: 0.886, green: 0.443, blue: 0.427)
     
-    /// Primary text – crisp white with subtle warmth
-    static let textPrimary = Color(red: 0.933, green: 0.937, blue: 0.969)
-    /// Secondary text – muted
-    static let textSecondary = Color(red: 0.600, green: 0.616, blue: 0.706)
+    /// Primary text
+    static var textPrimary: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                return NSColor(red: 0.933, green: 0.937, blue: 0.969, alpha: 1.0)
+            } else {
+                return NSColor(red: 0.08, green: 0.09, blue: 0.14, alpha: 1.0)
+            }
+        })
+    }
+    
+    /// Secondary text
+    static var textSecondary: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                return NSColor(red: 0.600, green: 0.616, blue: 0.706, alpha: 1.0)
+            } else {
+                return NSColor(red: 0.4, green: 0.42, blue: 0.5, alpha: 1.0)
+            }
+        })
+    }
+    
     /// Tertiary/disabled text
-    static let textTertiary = Color(red: 0.400, green: 0.416, blue: 0.506)
+    static var textTertiary: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                return NSColor(red: 0.400, green: 0.416, blue: 0.506, alpha: 1.0)
+            } else {
+                return NSColor(red: 0.6, green: 0.62, blue: 0.7, alpha: 1.0)
+            }
+        })
+    }
     
     /// Positive/recovery indicator
     static let positive = Color(red: 0.396, green: 0.784, blue: 0.588)
@@ -127,6 +179,8 @@ struct MindCycleCard: ViewModifier {
     var padding: CGFloat = MindCycleTheme.cardPadding
     
     func body(content: Content) -> some View {
+        @Environment(\.colorScheme) var colorScheme
+        
         content
             .padding(padding)
             .background {
@@ -134,8 +188,9 @@ struct MindCycleCard: ViewModifier {
                     .fill(MindCycleTheme.backgroundTertiary)
                     .overlay {
                         RoundedRectangle(cornerRadius: MindCycleTheme.cornerRadius, style: .continuous)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
+                            .stroke(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.04), lineWidth: 1)
                     }
+                    .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.2 : 0.05), radius: 10, x: 0, y: 4)
             }
     }
 }
@@ -147,6 +202,8 @@ struct GlowingCard: ViewModifier {
     var intensity: CGFloat = 0.3
     
     func body(content: Content) -> some View {
+        @Environment(\.colorScheme) var colorScheme
+        
         content
             .padding(MindCycleTheme.cardPadding)
             .background {
@@ -154,7 +211,7 @@ struct GlowingCard: ViewModifier {
                     .fill(MindCycleTheme.backgroundTertiary)
                     .overlay {
                         RoundedRectangle(cornerRadius: MindCycleTheme.cornerRadius, style: .continuous)
-                            .stroke(glowColor.opacity(0.3), lineWidth: 1)
+                            .stroke(glowColor.opacity(colorScheme == .dark ? 0.3 : 0.2), lineWidth: 1)
                     }
                     .shadow(color: glowColor.opacity(intensity), radius: 20, x: 0, y: 4)
             }

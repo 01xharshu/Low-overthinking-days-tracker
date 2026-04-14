@@ -40,7 +40,6 @@ struct MindCycleApp: App {
                 .environment(notificationManager)
                 .frame(minWidth: 900, minHeight: 600)
                 .background(MindCycleTheme.backgroundPrimary)
-                .preferredColorScheme(.dark)
         }
         .modelContainer(modelContainer)
         .windowStyle(.titleBar)

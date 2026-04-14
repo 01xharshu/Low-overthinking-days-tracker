@@ -116,7 +116,7 @@ struct MonthlyFrequencyChart: View {
                     AxisValueLabel(format: .dateTime.month(.abbreviated))
                         .foregroundStyle(MindCycleTheme.textTertiary)
                     AxisGridLine()
-                        .foregroundStyle(Color.white.opacity(0.04))
+                        .foregroundStyle(Color.primary.opacity(0.06))
                 }
             }
             .chartYAxis {
@@ -124,7 +124,7 @@ struct MonthlyFrequencyChart: View {
                     AxisValueLabel()
                         .foregroundStyle(MindCycleTheme.textTertiary)
                     AxisGridLine()
-                        .foregroundStyle(Color.white.opacity(0.04))
+                        .foregroundStyle(Color.primary.opacity(0.06))
                 }
             }
             .chartOverlay { proxy in
@@ -240,7 +240,7 @@ struct IntensityDistributionChart: View {
                     AxisValueLabel()
                         .foregroundStyle(MindCycleTheme.textTertiary)
                     AxisGridLine()
-                        .foregroundStyle(Color.white.opacity(0.04))
+                        .foregroundStyle(Color.primary.opacity(0.06))
                 }
             }
             .frame(height: 180)
@@ -357,7 +357,7 @@ struct CycleLengthChart: View {
                         AxisValueLabel()
                             .foregroundStyle(MindCycleTheme.textTertiary)
                         AxisGridLine()
-                            .foregroundStyle(Color.white.opacity(0.04))
+                            .foregroundStyle(Color.primary.opacity(0.06))
                     }
                 }
                 .frame(height: 180)
@@ -472,7 +472,7 @@ struct PhaseTimelineView: View {
                 .padding(.vertical, 2)
                 .background {
                     Capsule()
-                        .fill(Color.white.opacity(0.04))
+                        .fill(Color.primary.opacity(0.06))
                 }
         }
         .padding(12)
