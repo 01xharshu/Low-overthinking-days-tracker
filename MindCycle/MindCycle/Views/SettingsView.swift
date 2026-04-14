@@ -10,11 +10,24 @@ import SwiftData
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(NotificationManager.self) private var notificationManager
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    #endif
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
     
     @State private var showClearConfirmation = false
     @State private var showExportSuccess = false
     @State private var selectedExportFormat: DataExporter.ExportFormat = .json
+    @State private var exportURL: URL? = nil
+    @State private var showShareSheet = false
+    
+    private var isCompact: Bool {
+        #if os(iOS)
+        return sizeClass == .compact
+        #else
+        return false
+        #endif
+    }
     
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
@@ -22,25 +35,41 @@ struct SettingsView: View {
                 // Header
                 header
                 
-                HStack(alignment: .top, spacing: 20) {
-                    // Left column
+                if isCompact {
                     VStack(spacing: 20) {
                         notificationSection
-                        dataManagementSection
-                    }
-                    .frame(maxWidth: .infinity)
-                    
-                    // Right column
-                    VStack(spacing: 20) {
                         exportSection
+                        dataManagementSection
                         aboutSection
                     }
-                    .frame(maxWidth: .infinity)
+                } else {
+                    HStack(alignment: .top, spacing: 20) {
+                        // Left column
+                        VStack(spacing: 20) {
+                            notificationSection
+                            dataManagementSection
+                        }
+                        .frame(maxWidth: .infinity)
+                        
+                        // Right column
+                        VStack(spacing: 20) {
+                            exportSection
+                            aboutSection
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
                 }
             }
-            .padding(24)
+            .padding(isCompact ? 16 : 24)
         }
         .background(MindCycleTheme.backgroundPrimary)
+        .sheet(isPresented: $showShareSheet) {
+            #if os(iOS)
+            if let url = exportURL {
+                ActivityView(activityItems: [url])
+            }
+            #endif
+        }
         .alert("Clear All Data?", isPresented: $showClearConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Delete Everything", role: .destructive) {
@@ -144,17 +173,44 @@ struct SettingsView: View {
             HStack(spacing: 6) {
                 Image(systemName: "info.circle")
                     .font(.system(size: 11))
+                #if os(macOS)
                 Text("\(entries.count) entries ready to export")
                     .font(.system(size: 11))
+                #else
+                Text("\(entries.count) entries ready to export (Share Sheet)")
+                    .font(.system(size: 11))
+                #endif
             }
             .foregroundStyle(MindCycleTheme.textTertiary)
         }
         .mindCycleCard()
     }
+
+    private var dataManagementRow: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "internaldrive")
+                .font(.system(size: 11))
+            #if os(macOS)
+            Text("All data stored locally on your Mac • \(entries.count) entries")
+                .font(.system(size: 11))
+            #else
+            Text("All data stored locally on your device • \(entries.count) entries")
+                .font(.system(size: 11))
+            #endif
+        }
+    }
+
     
     private func exportButton(format: DataExporter.ExportFormat, icon: String, description: String) -> some View {
         Button {
-            DataExporter.export(entries: entries, format: format)
+            DataExporter.export(entries: entries, format: format) { url in
+                if let url = url {
+                    #if os(iOS)
+                    self.exportURL = url
+                    self.showShareSheet = true
+                    #endif
+                }
+            }
         } label: {
             HStack(spacing: 12) {
                 ZStack {
@@ -240,13 +296,8 @@ struct SettingsView: View {
                 }
                 
                 // Storage info
-                HStack(spacing: 6) {
-                    Image(systemName: "internaldrive")
-                        .font(.system(size: 11))
-                    Text("All data stored locally on your Mac • \(entries.count) entries")
-                        .font(.system(size: 11))
-                }
-                .foregroundStyle(MindCycleTheme.textTertiary)
+                dataManagementRow
+                    .foregroundStyle(MindCycleTheme.textTertiary)
             }
         }
         .mindCycleCard()
@@ -261,7 +312,11 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 aboutRow("Version", value: "1.0.0")
                 aboutRow("Build", value: "1")
+                #if os(macOS)
                 aboutRow("Platform", value: "macOS 14+")
+                #else
+                aboutRow("Platform", value: "iOS 17+")
+                #endif
                 aboutRow("Data Storage", value: "Local Only (SwiftData)")
                 aboutRow("Privacy", value: "No data leaves your device")
             }
@@ -381,3 +436,17 @@ struct SettingsView: View {
         notificationManager.removeAllPending()
     }
 }
+
+#if os(iOS)
+struct ActivityView: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    let applicationActivities: [UIActivity]? = nil
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+#endif
+

@@ -1,10 +1,10 @@
-// DataExporter.swift
-// MindCycle
-//
-// Handles exporting cycle data to JSON and CSV formats for backup/sharing.
-
 import Foundation
+#if os(macOS)
 import AppKit
+#else
+import UIKit
+import UniformTypeIdentifiers
+#endif
 
 /// Exports CycleEntry data to JSON or CSV files.
 struct DataExporter {
@@ -22,6 +22,15 @@ struct DataExporter {
             }
         }
         
+        #if os(iOS)
+        var utType: UTType {
+            switch self {
+            case .json: return .json
+            case .csv: return .commaSeparatedText
+            }
+        }
+        #endif
+
         var contentType: String {
             switch self {
             case .json: return "application/json"
@@ -54,8 +63,9 @@ struct DataExporter {
     
     // MARK: - Export Methods
     
-    /// Export entries in the specified format, presenting a save dialog.
-    static func export(entries: [CycleEntry], format: ExportFormat) {
+    /// Export entries in the specified format. 
+    /// On macOS, it presents a save dialog. On iOS, it returns the URL for sharing.
+    static func export(entries: [CycleEntry], format: ExportFormat, completion: ((URL?) -> Void)? = nil) {
         let sorted = entries.sorted { $0.date > $1.date }
         
         let data: Data?
@@ -67,25 +77,40 @@ struct DataExporter {
         }
         
         guard let exportData = data else { return }
+        let fileName = "mindcycle_export_\(dateStamp()).\(format.fileExtension)"
         
-        // Present save dialog
+        #if os(macOS)
         let panel = NSSavePanel()
         panel.title = "Export MindCycle Data"
-        panel.nameFieldStringValue = "mindcycle_export_\(dateStamp()).\(format.fileExtension)"
-        panel.allowedContentTypes = format == .json
-            ? [.json]
-            : [.commaSeparatedText]
+        panel.nameFieldStringValue = fileName
+        panel.allowedContentTypes = format == .json ? [.json] : [.commaSeparatedText]
         panel.canCreateDirectories = true
         
         panel.begin { response in
             if response == .OK, let url = panel.url {
                 do {
                     try exportData.write(to: url)
+                    completion?(url)
                 } catch {
                     print("Export failed: \(error.localizedDescription)")
+                    completion?(nil)
                 }
+            } else {
+                completion?(nil)
             }
         }
+        #else
+        // iOS: Write to a temp file and return URL for Share Sheet
+        let tempDir = FileManager.default.temporaryDirectory
+        let url = tempDir.appendingPathComponent(fileName)
+        do {
+            try exportData.write(to: url)
+            completion?(url)
+        } catch {
+            print("Export failed: \(error.localizedDescription)")
+            completion?(nil)
+        }
+        #endif
     }
     
     // MARK: - JSON Generation

@@ -48,8 +48,11 @@ struct SidebarView: View {
                 .padding(.bottom, 12)
         }
         .background(MindCycleTheme.backgroundSecondary)
+        #if os(macOS)
         .frame(minWidth: 200, idealWidth: 220, maxWidth: 260)
+        #endif
     }
+
     
     // MARK: - Header
     

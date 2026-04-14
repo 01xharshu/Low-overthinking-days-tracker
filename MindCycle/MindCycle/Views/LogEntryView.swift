@@ -9,6 +9,9 @@ import SwiftData
 
 struct LogEntryView: View {
     @Environment(\.modelContext) private var modelContext
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    #endif
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
     
     // MARK: - State
@@ -28,37 +31,69 @@ struct LogEntryView: View {
         return .lowFeeling
     }
     
+    private var isCompact: Bool {
+        #if os(iOS)
+        return sizeClass == .compact
+        #else
+        return false
+        #endif
+    }
+    
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: MindCycleTheme.sectionSpacing) {
                 // MARK: - Header
                 header
                 
-                HStack(alignment: .top, spacing: 20) {
-                    // Left column: Date + Type + Intensity
-                    VStack(spacing: 20) {
-                        dateSection
-                        typeSection
-                        intensitySection
-                    }
-                    .frame(maxWidth: .infinity)
-                    
-                    // Right column: Notes + Tags + Actions
-                    VStack(spacing: 20) {
-                        notesSection
-                        tagsSection
-                        saveSection
-                    }
-                    .frame(maxWidth: .infinity)
+                if isCompact {
+                    compactLayout
+                } else {
+                    regularLayout
                 }
             }
-            .padding(24)
+            .padding(isCompact ? 16 : 24)
         }
         .overlay {
             if showSavedConfirmation {
                 savedOverlay
             }
         }
+    }
+    
+    private var regularLayout: some View {
+        HStack(alignment: .top, spacing: 20) {
+            leftColumn
+            rightColumn
+        }
+    }
+    
+    private var compactLayout: some View {
+        VStack(spacing: 20) {
+            dateSection
+            typeSection
+            intensitySection
+            notesSection
+            tagsSection
+            saveSection
+        }
+    }
+    
+    private var leftColumn: some View {
+        VStack(spacing: 20) {
+            dateSection
+            typeSection
+            intensitySection
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    private var rightColumn: some View {
+        VStack(spacing: 20) {
+            notesSection
+            tagsSection
+            saveSection
+        }
+        .frame(maxWidth: .infinity)
     }
     
     // MARK: - Header

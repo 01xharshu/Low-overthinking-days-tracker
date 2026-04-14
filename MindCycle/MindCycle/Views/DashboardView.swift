@@ -17,6 +17,18 @@ struct DashboardView: View {
     
     @State private var animateCards = false
     
+    private var isCompact: Bool {
+        #if os(iOS)
+        return sizeClass == .compact
+        #else
+        return false
+        #endif
+    }
+    
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    #endif
+    
     private var statistics: CycleStatistics {
         patternEngine.computeStatistics(from: entries)
     }
@@ -28,7 +40,23 @@ struct DashboardView: View {
     private var phase: CyclePhase {
         patternEngine.currentPhase(from: entries)
     }
-    
+
+    private var statColumns: [GridItem] {
+        if isCompact {
+            return [GridItem(.flexible())]
+        } else {
+            return [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
+        }
+    }
+
+    private var infoColumns: [GridItem] {
+        if isCompact {
+            return [GridItem(.flexible())]
+        } else {
+            return [GridItem(.flexible()), GridItem(.flexible())]
+        }
+    }
+
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: MindCycleTheme.sectionSpacing) {
@@ -37,7 +65,7 @@ struct DashboardView: View {
                 
                 // MARK: - Quick Stats Row
                 if !entries.isEmpty {
-                    HStack(spacing: 16) {
+                    LazyVGrid(columns: statColumns, spacing: 16) {
                         DaysSinceCard(daysSince: statistics.daysSinceLastEntry ?? 0)
                             .opacity(animateCards ? 1 : 0)
                             .offset(y: animateCards ? 0 : 20)
@@ -53,7 +81,7 @@ struct DashboardView: View {
                 }
                 
                 // MARK: - Quick Log & Insight
-                HStack(spacing: 16) {
+                LazyVGrid(columns: infoColumns, spacing: 16) {
                     quickLogCard
                         .opacity(animateCards ? 1 : 0)
                         .offset(y: animateCards ? 0 : 20)
@@ -77,7 +105,7 @@ struct DashboardView: View {
                     emptyState
                 }
             }
-            .padding(24)
+            .padding(isCompact ? 16 : 24)
         }
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1)) {

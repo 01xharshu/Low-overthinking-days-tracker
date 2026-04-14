@@ -6,43 +6,62 @@
 
 import SwiftUI
 
+#if os(macOS)
+import AppKit
+typealias PlatformColor = NSColor
+#else
+import UIKit
+typealias PlatformColor = UIColor
+#endif
+
 // MARK: - MindCycle Theme
 
 struct MindCycleTheme {
+    
+    // MARK: - Platform Color Helper
+    
+    static func adaptiveColor(lightR: Double, lightG: Double, lightB: Double, darkR: Double, darkG: Double, darkB: Double) -> Color {
+        #if os(macOS)
+        return Color(nsColor: NSColor(name: nil) { appearance in
+            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
+                return NSColor(red: darkR, green: darkG, blue: darkB, alpha: 1.0)
+            } else {
+                return NSColor(red: lightR, green: lightG, blue: lightB, alpha: 1.0)
+            }
+        })
+        #else
+        return Color(uiColor: UIColor { traitCollection in
+            return traitCollection.userInterfaceStyle == .dark 
+                ? UIColor(red: darkR, green: darkG, blue: darkB, alpha: 1.0)
+                : UIColor(red: lightR, green: lightG, blue: lightB, alpha: 1.0)
+        })
+        #endif
+    }
     
     // MARK: - Core Palette
     
     /// Deep background
     static var backgroundPrimary: Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                return NSColor(red: 0.067, green: 0.071, blue: 0.106, alpha: 1.0)
-            } else {
-                return NSColor(red: 0.96, green: 0.97, blue: 1.0, alpha: 1.0)
-            }
-        })
+        adaptiveColor(
+            lightR: 0.96, lightG: 0.97, lightB: 1.0,
+            darkR: 0.067, darkG: 0.071, darkB: 0.106
+        )
     }
     
     /// Slightly elevated surface
     static var backgroundSecondary: Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                return NSColor(red: 0.098, green: 0.106, blue: 0.153, alpha: 1.0)
-            } else {
-                return NSColor(red: 0.92, green: 0.93, blue: 0.98, alpha: 1.0)
-            }
-        })
+        adaptiveColor(
+            lightR: 0.92, lightG: 0.93, lightB: 0.98,
+            darkR: 0.098, darkG: 0.106, darkB: 0.153
+        )
     }
     
     /// Card/panel surface
     static var backgroundTertiary: Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                return NSColor(red: 0.133, green: 0.145, blue: 0.200, alpha: 1.0)
-            } else {
-                return NSColor.white
-            }
-        })
+        adaptiveColor(
+            lightR: 1.0, lightG: 1.0, lightB: 1.0,
+            darkR: 0.133, darkG: 0.145, darkB: 0.200
+        )
     }
     
     /// Soft lavender accent – primary brand color
@@ -68,35 +87,26 @@ struct MindCycleTheme {
     
     /// Primary text
     static var textPrimary: Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                return NSColor(red: 0.933, green: 0.937, blue: 0.969, alpha: 1.0)
-            } else {
-                return NSColor(red: 0.08, green: 0.09, blue: 0.14, alpha: 1.0)
-            }
-        })
+        adaptiveColor(
+            lightR: 0.08, lightG: 0.09, lightB: 0.14,
+            darkR: 0.933, darkG: 0.937, darkB: 0.969
+        )
     }
     
     /// Secondary text
     static var textSecondary: Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                return NSColor(red: 0.600, green: 0.616, blue: 0.706, alpha: 1.0)
-            } else {
-                return NSColor(red: 0.4, green: 0.42, blue: 0.5, alpha: 1.0)
-            }
-        })
+        adaptiveColor(
+            lightR: 0.4, lightG: 0.42, lightB: 0.5,
+            darkR: 0.600, darkG: 0.616, darkB: 0.706
+        )
     }
     
     /// Tertiary/disabled text
     static var textTertiary: Color {
-        Color(nsColor: NSColor(name: nil) { appearance in
-            if appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua {
-                return NSColor(red: 0.400, green: 0.416, blue: 0.506, alpha: 1.0)
-            } else {
-                return NSColor(red: 0.6, green: 0.62, blue: 0.7, alpha: 1.0)
-            }
-        })
+        adaptiveColor(
+            lightR: 0.6, lightG: 0.62, lightB: 0.7,
+            darkR: 0.400, darkG: 0.416, darkB: 0.506
+        )
     }
     
     /// Positive/recovery indicator
@@ -176,11 +186,10 @@ struct MindCycleTheme {
 // MARK: - Card Modifier
 
 struct MindCycleCard: ViewModifier {
+    @Environment(\.colorScheme) var colorScheme
     var padding: CGFloat = MindCycleTheme.cardPadding
     
     func body(content: Content) -> some View {
-        @Environment(\.colorScheme) var colorScheme
-        
         content
             .padding(padding)
             .background {
@@ -198,12 +207,11 @@ struct MindCycleCard: ViewModifier {
 // MARK: - Glowing Card Modifier
 
 struct GlowingCard: ViewModifier {
+    @Environment(\.colorScheme) var colorScheme
     let glowColor: Color
     var intensity: CGFloat = 0.3
     
     func body(content: Content) -> some View {
-        @Environment(\.colorScheme) var colorScheme
-        
         content
             .padding(MindCycleTheme.cardPadding)
             .background {

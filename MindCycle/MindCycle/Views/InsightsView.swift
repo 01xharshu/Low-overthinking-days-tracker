@@ -11,6 +11,18 @@ struct InsightsView: View {
     @Environment(PatternEngine.self) private var patternEngine
     @Query(sort: \CycleEntry.date, order: .reverse) private var entries: [CycleEntry]
     
+    private var isCompact: Bool {
+        #if os(iOS)
+        return sizeClass == .compact
+        #else
+        return false
+        #endif
+    }
+    
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var sizeClass
+    #endif
+    
     @State private var animateCards = false
     
     private var statistics: CycleStatistics {
@@ -20,7 +32,15 @@ struct InsightsView: View {
     private var prediction: PredictionResult? {
         patternEngine.predictNextWindow(from: entries)
     }
-    
+
+    private var chartColumns: [GridItem] {
+        if isCompact {
+            return [GridItem(.flexible())]
+        } else {
+            return [GridItem(.flexible()), GridItem(.flexible())]
+        }
+    }
+
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             if entries.isEmpty {
@@ -50,7 +70,7 @@ struct InsightsView: View {
                         .opacity(animateCards ? 1 : 0)
                         .offset(y: animateCards ? 0 : 20)
                 }
-                .padding(24)
+                .padding(isCompact ? 16 : 24)
             }
         }
         .background(MindCycleTheme.backgroundPrimary)
@@ -109,7 +129,7 @@ struct InsightsView: View {
     // MARK: - Stats Overview
     
     private var statsOverview: some View {
-        HStack(spacing: 12) {
+        LazyVGrid(columns: isCompact ? [GridItem(.flexible()), GridItem(.flexible())] : [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             statCard(
                 title: "Total Entries",
                 value: "\(statistics.totalEntries)",
@@ -176,19 +196,14 @@ struct InsightsView: View {
     // MARK: - Charts Grid
     
     private var chartsGrid: some View {
-        VStack(spacing: 16) {
-            // Row 1: Monthly + Intensity
-            HStack(alignment: .top, spacing: 16) {
-                MonthlyFrequencyChart(entries: entries, patternEngine: patternEngine)
-                
-                VStack(spacing: 16) {
-                    IntensityDistributionChart(statistics: statistics)
-                    TypeDistributionChart(statistics: statistics)
-                }
-                .frame(maxWidth: .infinity)
+        LazyVGrid(columns: chartColumns, spacing: 16) {
+            MonthlyFrequencyChart(entries: entries, patternEngine: patternEngine)
+            
+            VStack(spacing: 16) {
+                IntensityDistributionChart(statistics: statistics)
+                TypeDistributionChart(statistics: statistics)
             }
             
-            // Row 2: Cycle length
             CycleLengthChart(
                 cycleLengths: statistics.cycleLengths,
                 averageCycleLength: statistics.averageCycleLength,

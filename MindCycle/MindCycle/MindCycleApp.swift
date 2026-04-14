@@ -38,10 +38,13 @@ struct MindCycleApp: App {
             ContentView()
                 .environment(patternEngine)
                 .environment(notificationManager)
+                #if os(macOS)
                 .frame(minWidth: 900, minHeight: 600)
                 .background(MindCycleTheme.backgroundPrimary)
+                #endif
         }
         .modelContainer(modelContainer)
+        #if os(macOS)
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unified(showsTitle: true))
         .defaultSize(width: 1100, height: 720)
@@ -66,7 +69,9 @@ struct MindCycleApp: App {
                 .keyboardShortcut("e", modifiers: [.command, .option])
             }
         }
+        #endif
     }
+
 }
 
 // MARK: - Notification Names for Keyboard Shortcuts
